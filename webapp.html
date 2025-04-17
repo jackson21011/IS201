@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe vs Computer</title>
+  <link rel="stylesheet" href="css/webapp.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #00fae9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .nav {
+      width: 100%;
+      display: flex;
+      justify-content: flex-start;
+      gap: 10px;
+      padding: 20px;
+    }
+
+    .nav a {
+      padding: 10px 20px;
+      background-color: #2196f3;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      border: 2px solid #ccc;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .cell:hover {
+      background-color: #f1f1f1;
+    }
+
+    #status {
+      font-size: 1.2rem;
+      margin: 10px 0;
+    }
+
+    #reset {
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      background-color: #4caf50;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <a href="index.html">Home</a>
+    <a href="scratch.html">Scratch</a>
+  </div>
+
+  <h1>Tic Tac Toe</h1>
+  <div class="board" id="board"></div>
+  <div id="status">Your Turn (X)</div>
+  <button id="reset">Reset Game</button>
+
+  <script>
+    const board = document.getElementById('board');
+    const statusText = document.getElementById('status');
+    const resetBtn = document.getElementById('reset');
+    let cells = [];
+    let boardState = Array(9).fill(null);
+    let gameOver = false;
+
+    const winPatterns = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6]
+    ];
+
+    function createBoard() {
+      board.innerHTML = '';
+      cells = [];
+      boardState = Array(9).fill(null);
+      gameOver = false;
+      statusText.textContent = "Your Turn (X)";
+
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.index = i;
+        cell.addEventListener('click', handlePlayerMove);
+        board.appendChild(cell);
+        cells.push(cell);
+      }
+    }
+
+    function handlePlayerMove(e) {
+      const index = e.target.dataset.index;
+      if (gameOver || boardState[index]) return;
+
+      boardState[index] = 'X';
+      cells[index].textContent = 'X';
+
+      if (checkWinner('X')) return;
+      if (boardState.every(cell => cell)) {
+        statusText.textContent = "It's a draw!";
+        gameOver = true;
+        return;
+      }
+
+      statusText.textContent = "Computer's Turn (O)";
+      setTimeout(handleComputerMove, 500);
+    }
+
+    function handleComputerMove() {
+      if (gameOver) return;
+      let emptyIndices = boardState
+        .map((val, idx) => val === null ? idx : null)
+        .filter(val => val !== null);
+
+      if (emptyIndices.length === 0) return;
+
+      let choice = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+      boardState[choice] = 'O';
+      cells[choice].textContent = 'O';
+
+      if (checkWinner('O')) return;
+      if (boardState.every(cell => cell)) {
+        statusText.textContent = "It's a draw!";
+        gameOver = true;
+        return;
+      }
+
+      statusText.textContent = "Your Turn (X)";
+    }
+
+    function checkWinner(player) {
+      for (let pattern of winPatterns) {
+        const [a, b, c] = pattern;
+        if (boardState[a] === player && boardState[b] === player && boardState[c] === player) {
+          cells[a].style.backgroundColor = cells[b].style.backgroundColor = cells[c].style.backgroundColor = player === 'X' ? '#81c784' : '#e57373';
+          statusText.textContent = player === 'X' ? "You Win! 🎉" : "Computer Wins 😞";
+          gameOver = true;
+          return true;
+        }
+      }
+      return false;
+    }
+
+    resetBtn.addEventListener('click', createBoard);
+    createBoard();
+  </script>
+</body>
+</html>
